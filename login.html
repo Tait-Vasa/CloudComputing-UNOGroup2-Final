@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Enter a Value</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        input, button {
+            font-size: 1em;
+            padding: 8px 12px;
+            margin: 5px;
+        }
+        #output {
+            margin-top: 15px;
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h2>Register Appointment</h2>
+    <input type="text" id="firstNameInput" placeholder="First Name">
+    <input type="text" id="lastNameInput" placeholder="Last Name">
+    <input type="text" id="timeInput" placeholder="Appointment Time">
+    <input type="text" id="dateInput" placeholder="Date">
+    <input type="text" id="phoneInput" placeholder="Phone">
+    <input type="text" id="emailInput" placeholder="Email">
+    <button onclick="submitValue()">Enter</button>
+    
+
+    <div id="output"></div>
+
+    <script>
+        function submitValue() {
+            const input = document.getElementById("userInput").value;
+            const output = document.getElementById("output");
+
+            if (input.trim() === "") {
+                output.textContent = "Please enter a value.";
+                output.style.color = "red";
+            } else {
+                output.textContent = `You entered: ${input}`;
+                output.style.color = "green";
+            }
+        }
+    </script>
+</body>
+</html>
