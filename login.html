@@ -26,6 +26,8 @@
     </style>
 </head>
 <body>
+
+    <!--Get Inout Values-->
     <h2>Register Appointment</h2>
     <input type="text" id="firstNameInput" placeholder="First Name">
     <input type="text" id="lastNameInput" placeholder="Last Name">
@@ -39,18 +41,45 @@
     <div id="output"></div>
 
     <script>
+
+       //Take User Values
         function submitValue() {
-            const input = document.getElementById("userInput").value;
+            const firstName = document.getElementById("firstNameInput").value;
+            const lastName  = document.getElementById("lastNameInput").value;
+            const time      = document.getElementById("timeInput").value;
+            const date      = document.getElementById("dateInput").value;
+            const phone     = document.getElementById("phoneInput").value;
+            const email     = document.getElementById("emailInput").value;
+
+
+
             const output = document.getElementById("output");
 
-            if (input.trim() === "") {
-                output.textContent = "Please enter a value.";
+            if (!firstName || !lastName || !time || !date || !phone || !email) {
+                output.textContent = "Please fill all fields.";
                 output.style.color = "red";
             } else {
-                output.textContent = `You entered: ${input}`;
-                output.style.color = "green";
+                 output.innerHTML = `
+                Appointment Registered:<br>
+                <strong>Name:</strong> ${firstName} ${lastName}<br>
+                <strong>Time:</strong> ${time}<br>
+                <strong>Date:</strong> ${date}<br>
+                <strong>Phone:</strong> ${phone}<br>
+                <strong>Email:</strong> ${email}
+            `;
+            output.style.color = "green";
             }
         }
+
+        //Pull an appointment Number from the server
+        function pullAppointmentNumber(){
+            /*TODO make a stack from the server that holds 99999 unique values 
+            each time an appointment is made pull from the top and makes it 
+            the Primary Key for the User*/
+        }
+
+
+
     </script>
 </body>
 </html>
