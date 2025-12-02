@@ -92,7 +92,6 @@
                 return;
             }
 
-            // Send appointment number to backend to verify it exists in appointments.db
             fetch("verify_appointment.php", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
