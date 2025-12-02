@@ -48,13 +48,14 @@
             border-radius: 10px;
             cursor: pointer;
             transition: transform 0.2s ease, background-color 0.3s;
+            margin: 10px;
         }
 
         button:hover {
             background-color: #0042c4;
             transform: translateY(-2px);
         }
-        
+
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -71,14 +72,44 @@
     <div class="card">
         <h1>Welcome!</h1>
         <p>
-            We're glad you're here. Use our system to register your appointment quickly and easily.
+            We're glad you're here. Use our system to register or manage your appointment.
         </p>
+
         <button onclick="goToRegistration()">Continue</button>
+        <button onclick="rescheduleAppointment()">Reschedule Appointment</button>
     </div>
 
     <script>
         function goToRegistration() {
             window.location.href = "login.html";
+        }
+
+        function rescheduleAppointment() {
+            const apptNum = prompt("Enter your appointment number to continue:");
+
+            if (!apptNum) {
+                alert("You must enter an appointment number.");
+                return;
+            }
+
+            // Send appointment number to backend to verify it exists in appointments.db
+            fetch("verify_appointment.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ appointment_number: apptNum })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.valid) {
+                    window.location.href = "reschedule.html?appointment=" + apptNum;
+                } else {
+                    alert("Appointment not found. Please check your appointment number.");
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Error connecting to server.");
+            });
         }
     </script>
 </body>
