@@ -92,7 +92,7 @@
                 return;
             }
 
-            fetch("verify_appointment.php", {
+            fetch("/verify_appointment", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ appointment_number: apptNum })
