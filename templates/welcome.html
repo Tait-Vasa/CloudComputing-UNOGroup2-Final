@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: linear-gradient(135deg, #e8f0ff, #f8fbff);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.9s ease-out;
+        }
+
+        .card {
+            background: white;
+            padding: 40px 55px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            text-align: center;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        h1 {
+            font-size: 2.6em;
+            margin: 0 0 15px;
+            color: #1f3a63;
+            font-weight: 700;
+        }
+
+        p {
+            font-size: 1.15em;
+            color: #4a627f;
+            margin: 0 0 30px;
+            line-height: 1.5;
+        }
+
+        button {
+            background-color: #005bff;
+            color: white;
+            border: none;
+            padding: 14px 35px;
+            font-size: 1.1em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.3s;
+            margin: 10px;
+        }
+
+        button:hover {
+            background-color: #0042c4;
+            transform: translateY(-2px);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h1>Welcome!</h1>
+        <p>
+            We're glad you're here. Use our system to register or manage your appointment.
+        </p>
+
+        <button onclick="goToRegistration()">Continue</button>
+        <button onclick="rescheduleAppointment()">Reschedule Appointment</button>
+    </div>
+
+    <script>
+        function goToRegistration() {
+            window.location.href = "/register";
+        }
+
+        function rescheduleAppointment() {
+            const apptNum = prompt("Enter your appointment number to continue:");
+
+            if (!apptNum) {
+                alert("You must enter an appointment number.");
+                return;
+            }
+
+            fetch("/verify_appointment", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ appointment_number: apptNum })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.valid) {
+                    window.location.href = "reschedule.html?appointment=" + apptNum;
+                } else {
+                    alert("Appointment not found. Please check your appointment number.");
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Error connecting to server.");
+            });
+        }
+    </script>
+</body>
+</html>
