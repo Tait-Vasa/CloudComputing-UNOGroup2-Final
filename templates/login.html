@@ -107,6 +107,15 @@
             output.style.color = "green";
 
 
+            const data = {
+                firstName,
+                lastName,
+                time,
+                date,
+                phone,
+                email
+            };
+
             fetch("/api/appointments", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
