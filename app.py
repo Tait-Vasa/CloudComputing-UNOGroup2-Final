@@ -1,52 +1,26 @@
 from flask import Flask, render_template, request, jsonify, url_for
-import sqlite3
+import boto3
+from boto3.dynamodb.conditions import Key
 from datetime import datetime
+import uuid
+import os
 
 app = Flask(__name__)
-DB_NAME = "appointments.db"
 
 
 # ------------------------------------------------------------
 # Database Helpers
 # ------------------------------------------------------------
-def init_db():
-    """
-    Initialize the database and create the appointments table
-    if it does not already exist.
-    """
-    conn = sqlite3.connect(DB_NAME)
-    cur = conn.cursor()
-    cur.execute(
-        """
-        CREATE TABLE IF NOT EXISTS appointments (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,     -- unique appointment id
-            first_name TEXT NOT NULL,
-            last_name  TEXT NOT NULL,
-            time       TEXT NOT NULL,                -- string (e.g., "13:30")
-            date       TEXT NOT NULL,                -- string (e.g., "2025-02-10")
-            phone      TEXT NOT NULL,
-            email      TEXT NOT NULL,
-            created_at TEXT NOT NULL                 -- ISO datetime string
-        );
-        """
-    )
-    conn.commit()
-    conn.close()
 
+dynamoDB = boto3.resource('dynamodb', region_name=os.environ.get('AWS_REGION', 'us-east-1'))
 
-def get_db_connection():
-    """
-    Return a new SQLite connection using Row format.
-    This allows accessing columns by name (row["first_name"]).
-    """
-    conn = sqlite3.connect(DB_NAME)
-    conn.row_factory = sqlite3.Row
-    return conn
-
+TABLE_NAME = os.environ.get('APPOINTMENTS_TABLE', "Appointments")
+table = dynamoDB.Table(TABLE_NAME)
 
 # ------------------------------------------------------------
 # Page Routes (render HTML templates)
 # ------------------------------------------------------------
+
 @app.route("/")
 def home():
     """
@@ -87,28 +61,20 @@ def register():
             email=email,
         )
 
-    # Insert into database
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute(
-        """
-        INSERT INTO appointments
-            (first_name, last_name, time, date, phone, email, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-        """,
-        (
-            first_name,
-            last_name,
-            time_value,
-            date_value,
-            phone,
-            email,
-            datetime.now().isoformat(timespec="seconds"),
-        ),
+    appointment_id = str(uuid.uuid4())
+
+    table.put_item(
+        Item = {
+            "appointmentId": appointment_id,
+            "firstName": first_name,
+            "lastName": last_name,
+            "time": time_value,
+            "date": date_value,
+            "phone": phone,
+            "email": email,
+            "createdAt": datetime.now().isoformat()
+        }
     )
-    conn.commit()
-    appointment_id = cur.lastrowid
-    conn.close()
 
     # Confirmation page after POST
     return f"""
@@ -160,40 +126,24 @@ def api_create_appointment():
     """
     data = request.get_json(silent=True) or {}
 
-    # Obtain data fields
-    first_name = data.get("firstName", "").strip()
-    last_name = data.get("lastName", "").strip()
-    time_value = data.get("time", "").strip()
-    date_value = data.get("date", "").strip()
-    phone = data.get("phone", "").strip()
-    email = data.get("email", "").strip()
+    fields = ["firstName", "lastName", "time", "date", "phone", "email"]
+    if not all(data.get(f) for f in fields):
+        return jsonify({"error" : "All fields are required..."}), 400
 
-    # Validate fields
-    if not all([first_name, last_name, time_value, date_value, phone, email]):
-        return jsonify({"error": "All fields are required."}), 400
+    appointment_id = str(uuid.uuid4())
 
-    # Insert into DB
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute(
-        """
-        INSERT INTO appointments
-            (first_name, last_name, time, date, phone, email, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-        """,
-        (
-            first_name,
-            last_name,
-            time_value,
-            date_value,
-            phone,
-            email,
-            datetime.now().isoformat(timespec="seconds"),
-        ),
+    table.put_item(
+        Item={
+            "appointmentId": appointment_id,
+            "firstName": data["firstName"],
+            "lastName": data["lastName"],
+            "time": data["time"],
+            "date": data["date"],
+            "phone": data["phone"],
+            "email": data["email"],
+            "createdAt": datetime.now().isoformat()
+        }
     )
-    conn.commit()
-    appointment_id = cur.lastrowid
-    conn.close()
 
     return jsonify({"id": appointment_id})
 
@@ -211,19 +161,11 @@ def verify_appointment():
     appt_num = data.get("appointment_number")
 
     # Validate integer
-    try:
-        appt_id = int(appt_num)
-    except (TypeError, ValueError):
-        return jsonify({"valid": False})
+    if not appt_num:
+        return jsonify({"error" : "No appointment number provided."}), 400
 
-    # Query DB
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT id FROM appointments WHERE id = ?", (appt_id,))
-    row = cur.fetchone()
-    conn.close()
-
-    return jsonify({"valid": row is not None})
+    response = table.get_item(Key={"appointmentId": appt_num})
+    return jsonify({"valid": "Item" in response})
 
 
 @app.route("/get_appointment/<int:appointment_id>", methods=["GET"])
@@ -240,31 +182,12 @@ def get_appointment(appointment_id):
         "time": ...
     }
     """
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute(
-        """
-        SELECT id, first_name, last_name, date, time
-        FROM appointments
-        WHERE id = ?
-        """,
-        (appointment_id,),
-    )
-    row = cur.fetchone()
-    conn.close()
+    response = table.get_item(Key={"appointmentId": appointment_id})
 
-    if row is None:
-        return jsonify({"error": "not found"}), 404
+    if "Item" not in response:
+        return jsonify({"error" : "No appointment found."}), 400
 
-    return jsonify(
-        {
-            "id": row["id"],
-            "first_name": row["first_name"],
-            "last_name": row["last_name"],
-            "date": row["date"],
-            "time": row["time"],
-        }
-    )
+    return jsonify(response["Item"])
 
 
 @app.route("/update_appointment", methods=["POST"])
@@ -282,6 +205,7 @@ def update_appointment():
         { "success": false, "error": "message" }
     """
     data = request.get_json(silent=True) or {}
+
     appt_id = data.get("id")
     new_date = data.get("new_date")
     new_time = data.get("new_time")
@@ -290,28 +214,12 @@ def update_appointment():
     if not appt_id or not new_date or not new_time:
         return jsonify({"success": False, "error": "Missing fields."}), 400
 
-    try:
-        appt_id = int(appt_id)
-    except (TypeError, ValueError):
-        return jsonify({"success": False, "error": "Invalid id."}), 400
-
-    # Update DB
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute(
-        """
-        UPDATE appointments
-        SET date = ?, time = ?
-        WHERE id = ?
-        """,
-        (new_date, new_time, appt_id),
+    table.update_item(
+        Key={"appointmentId": appt_id},
+        UpdateExpression="SET #d = :date, #t = :time",
+        ExpressionAttributeNames={"#d": "date", "#t": "time"},
+        ExpressionAttributeValues={":date": new_date, ":time": new_time}
     )
-    conn.commit()
-    updated = cur.rowcount
-    conn.close()
-
-    if updated == 0:
-        return jsonify({"success": False, "error": "Appointment not found."}), 404
 
     return jsonify({"success": True})
 
@@ -320,5 +228,4 @@ def update_appointment():
 # Flask Entry Point
 # ------------------------------------------------------------
 if __name__ == "__main__":
-    init_db()            # Ensure DB exists when running for the first time
     app.run(debug=True)  # Debug mode recommended for development

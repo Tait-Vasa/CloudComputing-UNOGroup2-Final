@@ -3,146 +3,230 @@
 <head>
     <meta charset="UTF-8">
     <title>Enter a Value</title>
+
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: linear-gradient(135deg, #e8f0ff, #f8fbff);
             height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.9s ease-out;
         }
-        input, select, button {
-            font-size: 1em;
-            padding: 8px 12px;
-            margin: 5px;
-            width: 180px;
+
+        .card {
+            background: white;
+            padding: 40px 55px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            width: 420px;
+            text-align: center;
+            animation: slideUp 0.8s ease-out;
         }
-        #output {
-            margin-top: 15px;
+
+        h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            color: #1f3a63;
+        }
+
+        p {
+            font-size: 1.05em;
+            color: #4a627f;
+            margin: 5px 0 20px;
+        }
+
+        label {
             font-weight: bold;
-            color: #333;
+            display: block;
+            margin-top: 15px;
+            color: #1f3a63;
+            text-align: left;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #b2c7df;
+            margin-top: 5px;
+            font-size: 1em;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            color: #757575;
+            border: 1px solid #b2c7df;
+            margin-top: 5px;
+            font-size: 1em;
+        }
+
+        button {
+            background-color: #005bff;
+            color: white;
+            border: none;
+            padding: 14px 35px;
+            font-size: 1.1em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.3s;
+            margin-top: 25px;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #0042c4;
+            transform: translateY(-2px);
+        }
+
+        a {
+            display: block;
+            margin-top: 15px;
+            color: #005bff;
+            text-decoration: none;
+            font-size: 0.95em;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
     </style>
 </head>
 <body>
+    <div class="card">
+        <h2>Register Appointment</h2>
 
-    <h2>Register Appointment</h2>
+        <label for="firstNameInput">First Name</label>
+        <input type="text" id="firstNameInput" placeholder="First Name">
+        <label for="lastNameInput">Last Name</label>
+        <input type="text" id="lastNameInput" placeholder="Last Name">
+        <label for="timeInput">Time</label>
+        <!-- <select> option works the best as it avoids   -->
+        <select id="timeInput">
+            <option value="">Select a Time</option>
+            <option>10:00</option>
+            <option>10:30</option>
+            <option>11:00</option>
+            <option>11:30</option>
+            <option>12:00</option>
+            <option>12:30</option>
+            <option>13:00</option>
+            <option>13:30</option>
+            <option>14:00</option>
+            <option>14:30</option>
+            <option>15:00</option>
+            <option>15:30</option>
+            <option>16:00</option>
+            <option>16:30</option>
+            <option>17:00</option>
+        </select>
+        <label for="dateInput">Date</label>
+        <input type="date" id="dateInput"/>
+        <label for="phoneInput">Phone Number</label>
+        <input type="text" id="phoneInput" placeholder="Phone">
+        <label for="emailInput">Email Address</label>
+        <input type="text" id="emailInput" placeholder="Email">
 
-    <input type="text" id="firstNameInput" placeholder="First Name">
-    <input type="text" id="lastNameInput" placeholder="Last Name">
-    
-    <select id="timeInput">
-    <option value="">Select a Time</option>
-    <option>10:00 AM</option>
-    <option>10:30 AM</option>
-    <option>11:00 AM</option>
-    <option>11:30 AM</option>
-    <option>12:00 PM</option>
-    <option>12:30 PM</option>
-    <option>1:00 PM</option>
-    <option>1:30 PM</option>
-    <option>2:00 PM</option>
-    <option>2:30 PM</option>
-    <option>3:00 PM</option>
-    <option>3:30 PM</option>
-    <option>4:00 PM</option>
-    <option>4:30 PM</option>
-    <option>5:00 PM</option></select>
+        <button onclick="submitValue()">Enter</button>
 
-    <input type="text" id="dateInput" placeholder="Date">
-    <input type="text" id="phoneInput" placeholder="Phone">
-    <input type="text" id="emailInput" placeholder="Email">
+        <a href="/">Back to Home</a>
 
-    <button onclick="submitValue()">Enter</button>
+        <div id="output"></div>
 
-    <div id="output"></div>
+        <script>
 
-    <script>
+            function submitValue() {
 
-        function submitValue() {
+                // Read and trim inputs
+                const firstName = document.getElementById("firstNameInput").value.trim();
+                const lastName  = document.getElementById("lastNameInput").value.trim();
+                const time      = document.getElementById("timeInput").value.trim();
+                const date      = document.getElementById("dateInput").value.trim();
+                const phone     = document.getElementById("phoneInput").value.trim();
+                const email     = document.getElementById("emailInput").value.trim();
 
-            // Read and trim inputs
-            const firstName = document.getElementById("firstNameInput").value.trim();
-            const lastName  = document.getElementById("lastNameInput").value.trim();
-            const time      = document.getElementById("timeInput").value.trim();
-            const date      = document.getElementById("dateInput").value.trim();
-            const phone     = document.getElementById("phoneInput").value.trim();
-            const email     = document.getElementById("emailInput").value.trim();
+                const output = document.getElementById("output");
 
-            const output = document.getElementById("output");
+                // Empty-field validation
+                if (!firstName || !lastName || !time || !date || !phone || !email) {
+                    output.textContent = "Please fill all fields.";
+                    output.style.color = "red";
+                    return;
+                }
 
-            // Empty-field validation
-            if (!firstName || !lastName || !time || !date || !phone || !email) {
-                output.textContent = "Please fill all fields.";
-                output.style.color = "red";
-                return;
+                // Phone validation: must be digits only and at least 10 long
+                if (!/^\d{10,}$/.test(phone)) {
+                    output.textContent = "Phone number must be at least 10 digits and contain only numbers.";
+                    output.style.color = "red";
+                    return;
+                }
+
+                // Email format validation
+                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailPattern.test(email)) {
+                    output.textContent = "Please enter a valid email address.";
+                    output.style.color = "red";
+                    return;
+                }
+
+                // If valid:
+                output.innerHTML = `
+                    Appointment Registered:<br>
+                    <strong>Name:</strong> ${firstName} ${lastName}<br>
+                    <strong>Time:</strong> ${time}<br>
+                    <strong>Date:</strong> ${date}<br>
+                    <strong>Phone:</strong> ${phone}<br>
+                    <strong>Email:</strong> ${email}
+                `;
+                output.style.color = "green";
+
+
+                const data = {
+                    firstName,
+                    lastName,
+                    time,
+                    date,
+                    phone,
+                    email
+                };
+
+                fetch("/api/appointments", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                })
+                .then(res => res.json())
+                .then(response => {
+                    document.getElementById("output").textContent =
+                        "Appointment saved with ID: " + response.id;
+                    document.getElementById("output").style.color = "green";
+                })
+                .catch(err => {
+                    document.getElementById("output").textContent = "Error saving appointment.";
+                    document.getElementById("output").style.color = "red";
+                });
             }
 
-            // Phone validation: must be digits only and at least 10 long
-            if (!/^\d{10,}$/.test(phone)) {
-                output.textContent = "Phone number must be at least 10 digits and contain only numbers.";
-                output.style.color = "red";
-                return;
+
+            function pullAppointmentNumber() {
+                /* TODO:
+                   - Server should maintain a stack of numbers 00001–99999.
+                   - When an appointment is created, pop the top value.
+                   - Assign as Primary Key.
+                */
             }
 
-            // Email format validation
-            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailPattern.test(email)) {
-                output.textContent = "Please enter a valid email address.";
-                output.style.color = "red";
-                return;
-            }
-
-            // If valid:
-            output.innerHTML = `
-                Appointment Registered:<br>
-                <strong>Name:</strong> ${firstName} ${lastName}<br>
-                <strong>Time:</strong> ${time}<br>
-                <strong>Date:</strong> ${date}<br>
-                <strong>Phone:</strong> ${phone}<br>
-                <strong>Email:</strong> ${email}
-            `;
-            output.style.color = "green";
-
-
-            const data = {
-                firstName,
-                lastName,
-                time,
-                date,
-                phone,
-                email
-            };
-
-            fetch("/api/appointments", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data)
-            })
-            .then(res => res.json())
-            .then(response => {
-                document.getElementById("output").textContent =
-                    "Appointment saved with ID: " + response.id;
-                document.getElementById("output").style.color = "green";
-            })
-            .catch(err => {
-                document.getElementById("output").textContent = "Error saving appointment.";
-                document.getElementById("output").style.color = "red";
-            });
-        }
-
-
-        function pullAppointmentNumber() {
-            /* TODO:
-               - Server should maintain a stack of numbers 00001–99999.
-               - When an appointment is created, pop the top value.
-               - Assign as Primary Key.
-            */
-        }
-
-    </script>
-
+        </script>
+    </div>
 </body>
 </html>
